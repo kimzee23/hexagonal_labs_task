@@ -2,7 +2,6 @@ package org.enums.labs_hexagonal.application.port.out;
 
 
 import org.enums.labs_hexagonal.domain.model.User;
-
 import java.util.Optional;
 import java.util.UUID;
 

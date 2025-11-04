@@ -57,7 +57,6 @@ public class AuthService implements AuthUseCase {
             }
         }
 
-        // Create new user
         User user = User.builder()
                 .id(UUID.randomUUID())
                 .email(request.getEmail())

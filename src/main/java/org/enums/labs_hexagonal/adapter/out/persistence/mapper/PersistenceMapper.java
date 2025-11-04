@@ -1,4 +1,4 @@
-package org.enums.labs_hexagonal.adapter.out.persistence;
+package org.enums.labs_hexagonal.adapter.out.persistence.mapper;
 
 import org.enums.labs_hexagonal.adapter.out.persistence.entity.SessionEntity;
 import org.enums.labs_hexagonal.adapter.out.persistence.entity.TalentProfileEntity;
