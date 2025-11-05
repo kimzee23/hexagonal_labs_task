@@ -1,10 +1,10 @@
 package org.enums.labs_hexagonal;
 
-import org.enums.labs_hexagonal.adapter.in.dto.request.ProfileRequest;
-import org.enums.labs_hexagonal.adapter.in.dto.response.ProfileResponse;
+import org.enums.labs_hexagonal.infrastructure.adapter.in.web.dto.request.ProfileRequest;
+import org.enums.labs_hexagonal.infrastructure.adapter.in.web.dto.response.ProfileResponse;
 import org.enums.labs_hexagonal.application.port.out.TalentProfilePort;
 import org.enums.labs_hexagonal.application.port.out.UserRepositoryPort;
-import org.enums.labs_hexagonal.application.service.ProfileService;
+import org.enums.labs_hexagonal.domain.service.ProfileService;
 import org.enums.labs_hexagonal.domain.model.TalentProfile;
 import org.enums.labs_hexagonal.domain.model.User;
 import org.junit.jupiter.api.BeforeEach;

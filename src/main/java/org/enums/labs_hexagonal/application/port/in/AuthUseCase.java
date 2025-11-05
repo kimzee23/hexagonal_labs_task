@@ -1,10 +1,9 @@
 package org.enums.labs_hexagonal.application.port.in;
 
 
-import org.enums.labs_hexagonal.adapter.in.dto.request.AuthDto;
-import org.enums.labs_hexagonal.adapter.in.dto.request.LoginRequest;
-import org.enums.labs_hexagonal.adapter.in.dto.request.SignupRequest;
-import org.enums.labs_hexagonal.adapter.in.dto.response.AuthResponse;
+import org.enums.labs_hexagonal.infrastructure.adapter.in.web.dto.request.LoginRequest;
+import org.enums.labs_hexagonal.infrastructure.adapter.in.web.dto.request.SignupRequest;
+import org.enums.labs_hexagonal.infrastructure.adapter.in.web.dto.response.AuthResponse;
 
 public interface AuthUseCase {
     AuthResponse signup(SignupRequest request);

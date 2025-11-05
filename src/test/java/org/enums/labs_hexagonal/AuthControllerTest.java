@@ -2,11 +2,11 @@ package org.enums.labs_hexagonal;
 
 
 
-import org.enums.labs_hexagonal.adapter.in.dto.request.LoginRequest;
-import org.enums.labs_hexagonal.adapter.in.dto.request.SignupRequest;
-import org.enums.labs_hexagonal.adapter.in.dto.request.VerifyEmailRequest;
-import org.enums.labs_hexagonal.adapter.in.dto.response.AuthResponse;
-import org.enums.labs_hexagonal.adapter.in.web.AuthController;
+import org.enums.labs_hexagonal.infrastructure.adapter.in.web.dto.request.LoginRequest;
+import org.enums.labs_hexagonal.infrastructure.adapter.in.web.dto.request.SignupRequest;
+import org.enums.labs_hexagonal.infrastructure.adapter.in.web.dto.request.VerifyEmailRequest;
+import org.enums.labs_hexagonal.infrastructure.adapter.in.web.dto.response.AuthResponse;
+import org.enums.labs_hexagonal.infrastructure.adapter.in.web.AuthController;
 import org.enums.labs_hexagonal.application.port.in.AuthUseCase;
 import org.enums.labs_hexagonal.domain.exception.*;
 import org.junit.jupiter.api.BeforeEach;
