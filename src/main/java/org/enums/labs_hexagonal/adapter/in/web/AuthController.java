@@ -1,60 +1,80 @@
 package org.enums.labs_hexagonal.adapter.in.web;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.enums.labs_hexagonal.adapter.in.dto.request.LoginRequest;
 import org.enums.labs_hexagonal.adapter.in.dto.request.SignupRequest;
 import org.enums.labs_hexagonal.adapter.in.dto.request.VerifyEmailRequest;
 import org.enums.labs_hexagonal.adapter.in.dto.response.AuthResponse;
 import org.enums.labs_hexagonal.application.port.in.AuthUseCase;
 import org.enums.labs_hexagonal.domain.exception.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/v1/auth")
 @RequiredArgsConstructor
+@Tag(name = "Authentication", description = "Authentication APIs for talent users")
 public class AuthController {
 
     private final AuthUseCase authUseCase;
 
     @PostMapping("/signup")
+    @Operation(summary = "User signup", description = "Create a new talent user account")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "User created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input or email already exists")
+    })
     public ResponseEntity<AuthResponse> signup(@Valid @RequestBody SignupRequest request) {
-        var response = authUseCase.signup(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(authUseCase.signup(request));
     }
 
     @PostMapping("/verify-email")
-    public ResponseEntity<?> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
+    @Operation(summary = "Verify email", description = "Verify user email with token")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Email verified successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid, expired, or already used token")
+    })
+    public ResponseEntity<Map<String, String>> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
         authUseCase.verifyEmail(request.getToken());
-        return ResponseEntity.ok().body(java.util.Map.of(
-                "message", "Email verified successfully. You can now log in."
-        ));
+        return ResponseEntity.ok(Map.of("message", "Email verified successfully. You can now log in."));
     }
 
     @PostMapping("/login")
+    @Operation(summary = "User login", description = "Login with email and password")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Login successful"),
+            @ApiResponse(responseCode = "400", description = "Invalid credentials or email not verified")
+    })
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        var response = authUseCase.login(request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(authUseCase.login(request));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletRequest httpRequest) {
-        String token = extractToken(httpRequest);
-        if (token != null) {
-            authUseCase.logout(token);
-        }
+    @Operation(summary = "User logout", description = "Logout and revoke current session")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Logout successful"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    public ResponseEntity<Void> logout(HttpServletRequest request) {
+        String token = extractToken(request);
+        if (token != null) authUseCase.logout(token);
         return ResponseEntity.noContent().build();
     }
 
     private String extractToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
-        }
-        return null;
+        var bearerToken = request.getHeader("Authorization");
+        return (bearerToken != null && bearerToken.startsWith("Bearer "))
+                ? bearerToken.substring(7)
+                : null;
     }
 
     @ExceptionHandler({
@@ -66,15 +86,12 @@ public class AuthController {
             InvalidTokenException.class,
             RateLimitException.class
     })
-    public ResponseEntity<Object> handleApplicationExceptions(RuntimeException ex) {
-        if (ex instanceof ApplicationException appEx) {
-            return ResponseEntity.status(getHttpStatus(appEx))
-                    .body(java.util.Map.of(
-                            "error", appEx.getErrorCode(),
-                            "message", appEx.getMessage()
-                    ));
-        }
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    public ResponseEntity<Map<String, String>> handleApplicationExceptions(ApplicationException ex) {
+        return ResponseEntity.status(getHttpStatus(ex))
+                .body(Map.of(
+                        "error", ex.getErrorCode(),
+                        "message", ex.getMessage()
+                ));
     }
 
     private HttpStatus getHttpStatus(ApplicationException ex) {

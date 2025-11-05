@@ -87,7 +87,7 @@ class AuthControllerTest {
                 .build();
 
         AuthResponse response = AuthResponse.builder()
-                .email("ada@gmail.com")
+                .email("ade@gmail.com")
                 .message("LOGIN_SUCCESS")
                 .sessionToken("token123")
                 .build();
