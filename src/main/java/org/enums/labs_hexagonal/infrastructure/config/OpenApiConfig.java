@@ -7,13 +7,26 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import io.swagger.v3.oas.models.servers.Server;
+import org.springframework.beans.factory.annotation.Value;
+
+
+import java.util.List;
 
 @Configuration
 public class OpenApiConfig {
 
+    @Value("${server.port:8081}")
+    private String serverPort;
+
     @Bean
     public OpenAPI enumOpenAPI() {
         return new OpenAPI()
+                .servers(List.of(
+                        new Server()
+                                .url("http://localhost:" + serverPort)
+                                .description("Local Development Server")
+                ))
                 .info(new Info()
                         .title("Enum Labs API")
                         .description("Talent Authentication and Profile Management API")

@@ -59,7 +59,6 @@ public class PersistenceMapper {
                 .build();
     }
 
-    // Session mappings
     public SessionEntity toSessionEntity(Session session) {
         return new SessionEntity(
                 session.getId(),

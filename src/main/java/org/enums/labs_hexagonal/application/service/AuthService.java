@@ -1,6 +1,8 @@
 package org.enums.labs_hexagonal.application.service;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.enums.labs_hexagonal.adapter.in.dto.request.LoginRequest;
 import org.enums.labs_hexagonal.adapter.in.dto.request.SignupRequest;
 import org.enums.labs_hexagonal.adapter.in.dto.response.AuthResponse;
@@ -22,10 +24,12 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class AuthService implements AuthUseCase {
+
 
     private final UserRepositoryPort userRepository;
     private final VerificationTokenPort verificationTokenPort;
@@ -36,6 +40,10 @@ public class AuthService implements AuthUseCase {
     private static final int TOKEN_EXPIRY_HOURS = 24;
     private static final int SESSION_EXPIRY_DAYS = 7;
 
+    @PostConstruct
+    public void init() {
+        log.info("=== EMAIL ADAPTER BEING USED: {} ===", emailPort.getClass().getSimpleName());
+    }
     @Override
     public AuthResponse signup(SignupRequest request) {
         Optional<User> existingUserOptional = userRepository.findByEmail(request.getEmail());

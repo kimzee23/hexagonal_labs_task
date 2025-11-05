@@ -22,7 +22,8 @@ public class SecurityConfig {
                                 "/.well-known/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/swagger-ui.html"
+                                "/swagger-ui.html",
+                                "/v1/profile/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
@@ -33,4 +34,3 @@ public class SecurityConfig {
         return http.build();
     }
 }
-

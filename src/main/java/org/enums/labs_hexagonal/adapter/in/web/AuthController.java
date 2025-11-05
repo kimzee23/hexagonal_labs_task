@@ -1,5 +1,6 @@
 package org.enums.labs_hexagonal.adapter.in.web;
 
+
 import org.enums.labs_hexagonal.adapter.in.dto.request.LoginRequest;
 import org.enums.labs_hexagonal.adapter.in.dto.request.SignupRequest;
 import org.enums.labs_hexagonal.adapter.in.dto.request.VerifyEmailRequest;
@@ -37,16 +38,19 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(authUseCase.signup(request));
     }
 
-    @PostMapping("/verify-email")
     @Operation(summary = "Verify email", description = "Verify user email with token")
-    @ApiResponses({
+    @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Email verified successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid, expired, or already used token")
+            @ApiResponse(responseCode = "400", description = "Invalid, expired or already used token")
     })
-    public ResponseEntity<Map<String, String>> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
+    @PostMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
         authUseCase.verifyEmail(request.getToken());
-        return ResponseEntity.ok(Map.of("message", "Email verified successfully. You can now log in."));
+        return ResponseEntity.ok().body(java.util.Map.of(
+                "message", "Email verified successfully. You can now log in."
+        ));
     }
+
 
     @PostMapping("/login")
     @Operation(summary = "User login", description = "Login with email and password")
