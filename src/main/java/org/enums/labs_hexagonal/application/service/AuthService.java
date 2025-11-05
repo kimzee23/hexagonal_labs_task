@@ -15,10 +15,10 @@ import org.enums.labs_hexagonal.domain.exception.*;
 import org.enums.labs_hexagonal.domain.model.Session;
 import org.enums.labs_hexagonal.domain.model.User;
 import org.enums.labs_hexagonal.domain.model.VerificationToken;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -36,14 +36,15 @@ public class AuthService implements AuthUseCase {
     private final SessionPort sessionPort;
     private final EmailPort emailPort;
     private final PasswordEncoder passwordEncoder;
+    private final RateLimitService rateLimitService;
 
     private static final int TOKEN_EXPIRY_HOURS = 24;
     private static final int SESSION_EXPIRY_DAYS = 7;
 
     @PostConstruct
-    public void init() {
-        log.info("=== EMAIL ADAPTER BEING USED: {} ===", emailPort.getClass().getSimpleName());
-    }
+//    public void init() {
+//        log.info("=== EMAIL in used: {} ===", emailPort.getClass().getSimpleName());
+//    }
     @Override
     public AuthResponse signup(SignupRequest request) {
         Optional<User> existingUserOptional = userRepository.findByEmail(request.getEmail());
@@ -109,6 +110,8 @@ public class AuthService implements AuthUseCase {
 
     @Override
     public AuthResponse login(LoginRequest request) {
+        rateLimitService.checkRateLimit(request.getEmail());
+
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(InvalidCredentialsException::new);
 
@@ -119,6 +122,7 @@ public class AuthService implements AuthUseCase {
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new InvalidCredentialsException();
         }
+        rateLimitService.recordLoginAttempt(request.getEmail(), true);
 
         Session session = Session.builder()
                 .id(UUID.randomUUID())
