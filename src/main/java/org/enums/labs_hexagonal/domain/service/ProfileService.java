@@ -1,17 +1,20 @@
 package org.enums.labs_hexagonal.domain.service;
 
 import lombok.RequiredArgsConstructor;
+import org.enums.labs_hexagonal.domain.model.User;
 import org.enums.labs_hexagonal.infrastructure.adapter.in.web.dto.request.ProfileRequest;
 import org.enums.labs_hexagonal.infrastructure.adapter.in.web.dto.response.ProfileResponse;
 import org.enums.labs_hexagonal.application.port.in.ProfileUseCase;
 import org.enums.labs_hexagonal.application.port.out.TalentProfilePort;
 import org.enums.labs_hexagonal.application.port.out.UserRepositoryPort;
 import org.enums.labs_hexagonal.domain.model.TalentProfile;
+import org.enums.labs_hexagonal.domain.exception.UnauthorizedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.enums.labs_hexagonal.domain.exception.UnauthorizedException;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -24,46 +27,48 @@ public class ProfileService implements ProfileUseCase {
 
     @Override
     public TalentProfile createOrUpdateProfile(String userEmail, ProfileRequest request) {
-        var user = userRepository.findByEmail(userEmail)
+        User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(UnauthorizedException::new);
 
-        var existingProfile = talentProfilePort.findByUserId(user.getId());
+        Optional<TalentProfile> existingProfile = talentProfilePort.findByUserId(user.getId());
 
         if (existingProfile.isPresent()) {
-            var profile = existingProfile.get();
+            TalentProfile profile = existingProfile.get();
             profile.setTranscript(request.getTranscript());
             profile.setStatementOfPurpose(request.getStatementOfPurpose());
             profile.setUpdatedAt(LocalDateTime.now());
             return talentProfilePort.save(profile);
-        } else {
-            var profile = TalentProfile.builder()
-                    .id(UUID.randomUUID())
-                    .userId(user.getId())
-                    .transcript(request.getTranscript())
-                    .statementOfPurpose(request.getStatementOfPurpose())
-                    .createdAt(LocalDateTime.now())
-                    .updatedAt(LocalDateTime.now())
-                    .build();
-            return talentProfilePort.save(profile);
         }
+
+        TalentProfile newProfile = TalentProfile.builder()
+                .id(UUID.randomUUID())
+                .userId(user.getId())
+                .transcript(request.getTranscript())
+                .statementOfPurpose(request.getStatementOfPurpose())
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        return talentProfilePort.save(newProfile);
     }
 
     @Override
     public ProfileResponse getProfile(String userEmail) {
-        var user = userRepository.findByEmail(userEmail)
+        User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(UnauthorizedException::new);
 
-        var profile = talentProfilePort.findByUserId(user.getId());
+        Optional<TalentProfile> profileOptional = talentProfilePort.findByUserId(user.getId());
 
-        if (profile.isEmpty()) {
+        if (profileOptional.isEmpty()) {
             return ProfileResponse.builder()
                     .email(user.getEmail())
                     .completeness(0)
-                    .missingFields(java.util.List.of("transcript", "statementOfPurpose"))
+                    .missingFields(List.of("transcript", "statementOfPurpose"))
                     .build();
         }
 
-        var talentProfile = profile.get();
+        TalentProfile talentProfile = profileOptional.get();
+
         return ProfileResponse.builder()
                 .email(user.getEmail())
                 .transcript(talentProfile.getTranscript())
